@@ -3,90 +3,122 @@
 # Declare variables to be passed into your templates.
 replicaCount: 1
 global:
- rabbitmq:
- host:
- value: ""
- username:
- value: guest
- password:
- value: guest
- keycloak:
- url: ""
- name: keycloak
- service:
- type: http
- port: 80
- ## The list of hostnames to be covered with this ingress record.
- ## Most likely this will be just one host, but in the event more hosts are needed, this is an array
- ingress:
- hostName: ""
-db:
- uri: ""
- name: activitipostgresql
- deployPostgres: false
- port: 5432
+  rabbitmq:
+    host:
+      value: ""
+    username:
+      value: guest
+    password:
+      value: guest
+  keycloak:
+    url: ""
+    name: keycloak
+    service:
+      type: http
+      port: 80
+    realm: ""
+    resource: ""
+  ## The list of hostnames to be covered with this ingress record.
+  ## Most likely this will be just one host, but in the event more hosts are needed, this is an array
+  gateway:
+    host: ""
 
-activitipostgresql:
- postgresPassword: activiti
+db:
+  uri:
+  username:
+  password:
+  driver:
+  platform:
+  generateDdl:
+  ddlAuto:
+
+postgres:
+  enabled: false
+  name: postgres
+  port: 5432
+  username: postgres
+  password:
+
+init:
+  image:
+    repository: alpine
+    tag: 3.8
+    pullPolicy: IfNotPresent
 
 ## Allows the specification of additional environment variables
 extraEnv: |
- # - name: ACT_KEYCLOAK_URL
- # valueFrom:
- # configMapKeyRef:
- # name: {{ .Release.Name }}-keycloak-http
- # key: expose-keycloak-service-key
+  # - name: ACT_KEYCLOAK_URL
+  #   valueFrom:
+  #     configMapKeyRef:
+  #       name: {{ .Release.Name }}-keycloak-http
+  #       key: expose-keycloak-service-key
+
+## Additional init containers, e. g. to wait for a db or SSO
+extraInitContainers: |
 
 javaOpts:
- xmx: 768m
- xms: 512m
- other: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Dsun.zip.disableMemoryMapping=true -XX:+UseParallelGC -XX:MinHeapFreeRatio=5 -XX:MaxHeapFreeRatio=10 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90
+  xmx: 2048m
+  xms: 512m
+  other: -XX:+UnlockExperimentalVMOptions -Dsun.zip.disableMemoryMapping=true -XX:+UseParallelGC -XX:MinHeapFreeRatio=5 -XX:MaxHeapFreeRatio=10 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90
+# only set this variable if a private registry secret is needed to pull the image
+#registryPullSecrets: private-registry-secret
 image:
- repository: activiti-runtime-bundle-custom
- tag: 0.0.1-SNAPSHOT
- pullPolicy: IfNotPresent
+  repository: activiti/example-runtime-bundle
+  tag: 7.0.0.SR1
+  pullPolicy: IfNotPresent
 service:
- name: sample-activiti7-app-rb
- type: ClusterIP
- externalPort: 80
- internalPort: 8080
- annotations:
- fabric8.io/expose: "false"
+  type: ClusterIP
+  externalPort: 80
+  internalPort: 8080
+  annotations:
+    fabric8.io/expose: "false"
 resources:
- limits:
- memory: 768Mi
- requests:
- cpu: 400m
- memory: 768Mi
+  limits:
+    cpu: 2
+    memory: 2048Mi
+  requests:
+    cpu: 200m
+    memory: 512Mi
 probePath: /actuator/health
 livenessProbe:
- initialDelaySeconds: 140
- periodSeconds: 15
- successThreshold: 1
- timeoutSeconds: 4
+  initialDelaySeconds: 60
+  periodSeconds: 15
+  timeoutSeconds: 4
+  successThreshold: 1
+  failureThreshold: 4
 readinessProbe:
- periodSeconds: 15
- successThreshold: 1
- timeoutSeconds: 3
+  initialDelaySeconds: 20
+  periodSeconds: 15
+  timeoutSeconds: 3
+  successThreshold: 1
+  failureThreshold: 3
 terminationGracePeriodSeconds: 20
 
 
 ingress:
- ## Set to true to enable ingress record generation
- enabled: false
+  ## Set to true to enable ingress record generation
+  enabled: false
 
- path: /sample-app-rb
+  path: /rb-my-app
 
- ## Set this to true in order to enable TLS on the ingress record
- tls: false
+  ## Set this to override global.gateway.host name
+  hostName: 
 
- ## If TLS is set to true, you must declare what secret will store the key/certificate for TLS
- tlsSecret: myTlsSecret
+  ## Set this to true in order to enable TLS on the ingress record
+  tls: 
 
- ## Ingress annotations done as key:value pairs
- annotations:
- kubernetes.io/ingress.class: nginx
- nginx.ingress.kubernetes.io/rewrite-target: /
- nginx.ingress.kubernetes.io/enable-cors: "true"
- nginx.ingress.kubernetes.io/cors-allow-headers: "X-Forwarded-For, X-Forwarded-Proto, X-Forwarded-Port, X-Forwarded-Prefix,DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,X-CSRF-Token,Access-Control-Request-Headers,Access-Control-Request-Method,accept,Keep-Alive"
- nginx.ingress.kubernetes.io/x-forwarded-prefix: "true"
+  ## If TLS is set to true, you must declare what secret will store the key/certificate for TLS
+  tlsSecret: 
+
+  ## Ingress annotations done as key:value pairs
+  annotations: {}
+
+#only needed when using sck8s
+rbac:
+  create: true
+serviceAccount:
+  create: true
+
+## Add additional volumes and mounts
+extraVolumes: |
+extraVolumeMounts: |
