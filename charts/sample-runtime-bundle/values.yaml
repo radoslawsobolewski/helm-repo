@@ -41,8 +41,8 @@ postgres:
 
 init:
   image:
-    repository: alpine
-    tag: 3.8
+    repository: activiti-runtime-bundle-custom
+    tag: 0.0.1-SNAPSHOT
     pullPolicy: IfNotPresent
 
 ## Allows the specification of additional environment variables
@@ -99,16 +99,16 @@ ingress:
   ## Set to true to enable ingress record generation
   enabled: false
 
-  path: /rb-my-app
+  path: /sample-app-rb
 
   ## Set this to override global.gateway.host name
-  hostName: 
+  hostName:
 
   ## Set this to true in order to enable TLS on the ingress record
-  tls: 
+  tls:
 
   ## If TLS is set to true, you must declare what secret will store the key/certificate for TLS
-  tlsSecret: 
+  tlsSecret:
 
   ## Ingress annotations done as key:value pairs
   annotations: {}
