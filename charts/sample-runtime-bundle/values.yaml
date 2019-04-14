@@ -34,7 +34,7 @@ db:
 
 postgres:
   enabled: false
-  name: postgres
+  n:ame: postgres
   port: 5432
   username: postgres
   password:
@@ -42,7 +42,7 @@ postgres:
 init:
   image:
     repository: activiti-runtime-bundle-custom
-    tag: 0.0.5
+    tag: 0.0.6
     pullPolicy: IfNotPresent
 
 ## Allows the specification of additional environment variables
@@ -64,7 +64,7 @@ javaOpts:
 #registryPullSecrets: private-registry-secret
 image:
   repository: activiti-runtime-bundle-custom
-  tag: 0.0.5
+  tag: 0.0.6
   pullPolicy: IfNotPresent
 service:
   name: sample-activiti7-app-rb
@@ -100,7 +100,7 @@ ingress:
   ## Set to true to enable ingress record generation
   enabled: false
 
-  path: /sample-activiti7-app/rb
+  path: /sample-activiti7-app-rb
 
   ## Set this to override global.gateway.host name
   hostName:
